@@ -1,5 +1,5 @@
 /**
- * @loginwithchatgpt/server
+ * @opencoredev/loginwithchatgpt-server
  *
  * Backend that hosts the Login with ChatGPT flow. Returns a single
  * Web-standard `(Request) => Response` handler you mount at a base path; it
@@ -37,4 +37,4 @@ export {
   type KeyValueStore,
   type LoginStatus,
   MemoryStore,
-} from "@loginwithchatgpt/core";
+} from "@opencoredev/loginwithchatgpt-core";

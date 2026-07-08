@@ -1,4 +1,4 @@
-# @loginwithchatgpt/ai
+# @opencoredev/loginwithchatgpt-ai
 
 Vercel AI SDK provider for [Login with ChatGPT](../../README.md).
 
@@ -8,7 +8,7 @@ server.
 ## Browser proxy mode
 
 ```ts
-import { createChatGPTProxyProvider } from "@loginwithchatgpt/ai";
+import { createChatGPTProxyProvider } from "@opencoredev/loginwithchatgpt-ai";
 import { streamText } from "ai";
 
 const chatgpt = createChatGPTProxyProvider({ basePath: "/api/chatgpt" });
@@ -30,7 +30,7 @@ The proxy provider sends requests to your server handler. Tokens stay server-sid
 ## Server token mode
 
 ```ts
-import { createChatGPT } from "@loginwithchatgpt/ai";
+import { createChatGPT } from "@opencoredev/loginwithchatgpt-ai";
 import { streamText } from "ai";
 
 const chatgpt = createChatGPT({

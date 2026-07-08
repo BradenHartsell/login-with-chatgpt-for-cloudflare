@@ -11,7 +11,7 @@ from the API (`api.example.com`) takes changes on both sides.
 ## Server: allow the origin and loosen the cookie
 
 ```ts title="api server"
-import { createChatGPTHandler } from "@loginwithchatgpt/server";
+import { createChatGPTHandler } from "@opencoredev/loginwithchatgpt-server";
 
 const auth = createChatGPTHandler({
   secret: process.env.LWC_SECRET,
@@ -37,8 +37,8 @@ The hook and the proxy provider both need the handler's absolute URL and
 credentialed fetches:
 
 ```tsx title="frontend"
-import { useLoginWithChatGPT } from "@loginwithchatgpt/react";
-import { createChatGPTProxyProvider } from "@loginwithchatgpt/ai";
+import { useLoginWithChatGPT } from "@opencoredev/loginwithchatgpt-react";
+import { createChatGPTProxyProvider } from "@opencoredev/loginwithchatgpt-ai";
 
 const basePath = "https://api.example.com/api/chatgpt";
 

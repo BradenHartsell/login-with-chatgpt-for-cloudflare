@@ -58,7 +58,7 @@ own route on [`auth.getTokens()`](/docs/reference/server#gettokensrequest-option
 ## Request normalization
 
 The ChatGPT-backed Codex endpoint is stateless and rejects some standard
-Responses API fields. `createCodexFetch()` from `@loginwithchatgpt/core`
+Responses API fields. `createCodexFetch()` from `@opencoredev/loginwithchatgpt-core`
 rewrites every body the same way for both the proxy and the direct provider:
 
 - Forces `store: false`. Turns are stateless.

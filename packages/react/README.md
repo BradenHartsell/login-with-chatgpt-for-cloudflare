@@ -1,4 +1,4 @@
-# @loginwithchatgpt/react
+# @opencoredev/loginwithchatgpt-react
 
 React UI primitives for [Login with ChatGPT](../../README.md).
 
@@ -15,7 +15,7 @@ This package includes:
 ```tsx
 "use client";
 
-import { LoginWithChatGPT } from "@loginwithchatgpt/react";
+import { LoginWithChatGPT } from "@opencoredev/loginwithchatgpt-react";
 
 export function SignIn() {
   return <LoginWithChatGPT basePath="/api/chatgpt" consent={{ appName: "Acme" }} />;
@@ -31,7 +31,7 @@ if your app renders equivalent usage-risk consent before calling `login()`.
 ```tsx
 "use client";
 
-import { useLoginWithChatGPT } from "@loginwithchatgpt/react";
+import { useLoginWithChatGPT } from "@opencoredev/loginwithchatgpt-react";
 
 export function CustomButton() {
   const auth = useLoginWithChatGPT({ basePath: "/api/chatgpt" });

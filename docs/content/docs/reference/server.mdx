@@ -4,7 +4,7 @@ description: createChatGPTHandler() options, defaults, and the getSession / getT
 ---
 
 ```ts
-import { createChatGPTHandler } from "@loginwithchatgpt/server";
+import { createChatGPTHandler } from "@opencoredev/loginwithchatgpt-server";
 
 const auth = createChatGPTHandler(options);
 ```
@@ -95,7 +95,7 @@ which exists for exporting a session, not for request handling.
 Use it to build your own server-side AI route:
 
 ```ts title="app/api/chat/route.ts"
-import { createChatGPT } from "@loginwithchatgpt/ai";
+import { createChatGPT } from "@opencoredev/loginwithchatgpt-ai";
 import { streamText } from "ai";
 
 export async function POST(request: Request) {

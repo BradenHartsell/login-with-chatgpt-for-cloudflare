@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { gitConfig } from "@/lib/shared";
 
-const installCode = `bun add @loginwithchatgpt/server \\
-  @loginwithchatgpt/react @loginwithchatgpt/ai`;
+const installCode = `bun add @opencoredev/loginwithchatgpt-server \\
+  @opencoredev/loginwithchatgpt-react @opencoredev/loginwithchatgpt-ai`;
 
 const serverCode = `const auth = createChatGPTHandler({
   secret: process.env.LWC_SECRET,

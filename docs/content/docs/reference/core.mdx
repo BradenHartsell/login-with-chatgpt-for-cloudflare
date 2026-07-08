@@ -1,9 +1,9 @@
 ---
 title: Core primitives
-description: ChatGPTConfig, exported defaults, and the device-flow, token, and transport primitives in @loginwithchatgpt/core.
+description: ChatGPTConfig, exported defaults, and the device-flow, token, and transport primitives in @opencoredev/loginwithchatgpt-core.
 ---
 
-`@loginwithchatgpt/core` contains the primitives the other packages are built
+`@opencoredev/loginwithchatgpt-core` contains the primitives the other packages are built
 on. Reach for it when building [headless logins](/docs/guides/headless), custom
 handlers, or tests. Typical apps never import it directly.
 
@@ -39,7 +39,7 @@ import {
   exchangeDeviceAuthorization,
   waitForDeviceTokens,
   resolveConfig,
-} from "@loginwithchatgpt/core";
+} from "@opencoredev/loginwithchatgpt-core";
 
 const config = resolveConfig();
 const device = await requestDeviceCode(config);

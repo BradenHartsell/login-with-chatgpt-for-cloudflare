@@ -1,4 +1,4 @@
-# @loginwithchatgpt/server
+# @opencoredev/loginwithchatgpt-server
 
 Backend handler for [Login with ChatGPT](../../README.md).
 
@@ -6,7 +6,7 @@ It exposes login, status, session, logout, model discovery, and responses proxy
 routes from one Web-standard `(Request) => Response` handler.
 
 ```ts
-import { createChatGPTHandler } from "@loginwithchatgpt/server";
+import { createChatGPTHandler } from "@opencoredev/loginwithchatgpt-server";
 
 const auth = createChatGPTHandler({
   basePath: "/api/chatgpt",

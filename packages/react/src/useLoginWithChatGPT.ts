@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChatGPTUser, LoginStatus } from "@loginwithchatgpt/core";
+import type { ChatGPTUser, LoginStatus } from "@opencoredev/loginwithchatgpt-core";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /** Client-side status: the server statuses plus transient hydration/connecting phases. */

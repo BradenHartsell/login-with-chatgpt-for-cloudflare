@@ -1,5 +1,5 @@
 /**
- * @loginwithchatgpt/ai
+ * @opencoredev/loginwithchatgpt-ai
  *
  * A Vercel AI SDK provider for the ChatGPT-backed Codex responses API. Models
  * run on the signed-in user's own ChatGPT plan, so usage is billed to them —
@@ -14,4 +14,4 @@ export {
   type ChatGPTLanguageModel,
 } from "./provider.ts";
 export { ChatGPTProxyError, createChatGPTProxyProvider, type CreateChatGPTProxyOptions } from "./proxy.ts";
-export { type ChatGPTTokens, type ChatGPTConfig } from "@loginwithchatgpt/core";
+export { type ChatGPTTokens, type ChatGPTConfig } from "@opencoredev/loginwithchatgpt-core";

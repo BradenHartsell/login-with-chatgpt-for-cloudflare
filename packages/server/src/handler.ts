@@ -14,7 +14,7 @@ import {
   listCodexModels,
   randomToken,
   resolveConfig,
-} from "@loginwithchatgpt/core";
+} from "@opencoredev/loginwithchatgpt-core";
 import { type CookieOptions, readCookie, serializeCookie } from "./cookies.ts";
 import { sign, unsign } from "./crypto.ts";
 import { SessionManager, type StoredSession } from "./session.ts";

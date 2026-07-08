@@ -1,4 +1,4 @@
-import { base64UrlDecodeToBytes, base64UrlEncode } from "@loginwithchatgpt/core";
+import { base64UrlDecodeToBytes, base64UrlEncode } from "@opencoredev/loginwithchatgpt-core";
 
 /**
  * Web Crypto helpers for signing session cookies (HMAC-SHA256) and encrypting

@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { DEFAULT_MODEL, extractCodexModelSlugs, type FetchLike } from "@loginwithchatgpt/core";
+import { DEFAULT_MODEL, extractCodexModelSlugs, type FetchLike } from "@opencoredev/loginwithchatgpt-core";
 import type { ChatGPTProvider } from "./provider.ts";
 
 export interface CreateChatGPTProxyOptions {

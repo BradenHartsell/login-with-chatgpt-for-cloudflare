@@ -1,5 +1,5 @@
 {
-  "name": "@loginwithchatgpt/react",
+  "name": "@opencoredev/loginwithchatgpt-react",
   "version": "0.1.0",
   "description": "React hook and <LoginWithChatGPT /> button that drive the Login with ChatGPT device-code flow against your backend handler.",
   "type": "module",
@@ -24,7 +24,7 @@
     "prepublishOnly": "rm -rf dist && bun run build"
   },
   "dependencies": {
-    "@loginwithchatgpt/core": "workspace:*"
+    "@opencoredev/loginwithchatgpt-core": "workspace:*"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0"

@@ -9,7 +9,7 @@ browser proxy provider. HTTP routes return structured JSON errors.
 ## `ChatGPTAuthError`
 
 ```ts
-import { ChatGPTAuthError, isRefreshTokenInvalid } from "@loginwithchatgpt/core";
+import { ChatGPTAuthError, isRefreshTokenInvalid } from "@opencoredev/loginwithchatgpt-core";
 
 try {
   await auth.getModels(request);
@@ -60,7 +60,7 @@ Thrown by the browser proxy provider's `listModels()` when your handler
 answers non-OK:
 
 ```ts
-import { ChatGPTProxyError } from "@loginwithchatgpt/ai";
+import { ChatGPTProxyError } from "@opencoredev/loginwithchatgpt-ai";
 
 try {
   await chatgpt.listModels();

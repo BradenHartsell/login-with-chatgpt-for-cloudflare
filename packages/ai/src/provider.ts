@@ -11,7 +11,7 @@ import {
   isAccessTokenExpired,
   listCodexModels,
   resolveConfig,
-} from "@loginwithchatgpt/core";
+} from "@opencoredev/loginwithchatgpt-core";
 
 /** A responses-API model created by a {@link ChatGPTProvider}. */
 export type ChatGPTLanguageModel = ReturnType<OpenAIProvider["responses"]>;

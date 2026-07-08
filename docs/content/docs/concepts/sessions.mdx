@@ -37,7 +37,7 @@ it loses sessions on restart and cannot be shared across instances or
 serverless invocations.
 
 ```ts title="server.ts"
-import { createChatGPTHandler } from "@loginwithchatgpt/server";
+import { createChatGPTHandler } from "@opencoredev/loginwithchatgpt-server";
 
 const auth = createChatGPTHandler({
   secret: process.env.LWC_SECRET,

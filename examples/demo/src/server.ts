@@ -1,4 +1,4 @@
-import { createChatGPTHandler, type KeyValueStore, type StoredSession } from "@loginwithchatgpt/server";
+import { createChatGPTHandler, type KeyValueStore, type StoredSession } from "@opencoredev/loginwithchatgpt-server";
 import index from "./index.html";
 
 interface FileStoreEntry<T> {

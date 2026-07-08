@@ -13,7 +13,7 @@ In the browser, the proxy provider calls `GET /api/chatgpt/models` through
 your handler:
 
 ```ts title="browser"
-import { createChatGPTProxyProvider } from "@loginwithchatgpt/ai";
+import { createChatGPTProxyProvider } from "@opencoredev/loginwithchatgpt-ai";
 
 const chatgpt = createChatGPTProxyProvider();
 const models = await chatgpt.listModels(); // ["gpt-5.5", "gpt-5.4", ...]

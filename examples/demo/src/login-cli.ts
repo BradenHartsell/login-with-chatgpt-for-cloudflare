@@ -5,8 +5,8 @@
  *
  *   bun run src/login-cli.ts "your prompt here"
  */
-import { createChatGPT } from "@loginwithchatgpt/ai";
-import { requestDeviceCode, resolveConfig, waitForDeviceTokens } from "@loginwithchatgpt/core";
+import { createChatGPT } from "@opencoredev/loginwithchatgpt-ai";
+import { requestDeviceCode, resolveConfig, waitForDeviceTokens } from "@opencoredev/loginwithchatgpt-core";
 import { streamText } from "ai";
 
 const prompt = process.argv[2] ?? "Tell me a short joke about caching.";

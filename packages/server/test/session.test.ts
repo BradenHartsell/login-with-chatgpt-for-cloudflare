@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { MemoryStore, resolveConfig } from "@loginwithchatgpt/core";
+import { MemoryStore, resolveConfig } from "@opencoredev/loginwithchatgpt-core";
 import { SessionManager, type StoredSession } from "../src/session.ts";
 import { createOpenAIMock } from "./helpers.ts";
 

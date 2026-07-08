@@ -3,7 +3,7 @@ title: React
 description: The LoginWithChatGPT widget, the useLoginWithChatGPT hook, and the consent popup helper.
 ---
 
-`@loginwithchatgpt/react` ships two layers over the same state machine: a
+`@opencoredev/loginwithchatgpt-react` ships two layers over the same state machine: a
 drop-in widget and a hook for custom UIs. Both are client components and
 require a mounted [server handler](server.mdx).
 
@@ -12,7 +12,7 @@ require a mounted [server handler](server.mdx).
 ```tsx title="components/sign-in.tsx"
 "use client";
 
-import { LoginWithChatGPT } from "@loginwithchatgpt/react";
+import { LoginWithChatGPT } from "@opencoredev/loginwithchatgpt-react";
 
 export function SignIn() {
   return (
@@ -55,7 +55,7 @@ on first mount. Override those classes to restyle without a custom renderer.
 ```tsx
 "use client";
 
-import { useLoginWithChatGPT } from "@loginwithchatgpt/react";
+import { useLoginWithChatGPT } from "@opencoredev/loginwithchatgpt-react";
 
 const auth = useLoginWithChatGPT({ pollIntervalMs: 2500 });
 ```
@@ -113,7 +113,7 @@ Opens the built-in consent popup and, on continue, calls your `login` with
 that popup so the verification page loads in the same window:
 
 ```ts
-import { openLoginWithChatGPTConsentPopup } from "@loginwithchatgpt/react";
+import { openLoginWithChatGPTConsentPopup } from "@opencoredev/loginwithchatgpt-react";
 
 const popup = openLoginWithChatGPTConsentPopup({
   appName: "Acme",

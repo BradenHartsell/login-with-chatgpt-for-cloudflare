@@ -1,5 +1,5 @@
 /**
- * @loginwithchatgpt/core
+ * @opencoredev/loginwithchatgpt-core
  *
  * Framework-agnostic engine for "Login with ChatGPT". Implements OpenAI's
  * device-code and loopback PKCE OAuth flows, token refresh, JWT/account

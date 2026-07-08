@@ -17,15 +17,15 @@ Vercel AI SDK without seeing an access token.
 
 | Package | Job |
 | --- | --- |
-| `@loginwithchatgpt/core` | Device-code OAuth, PKCE helpers, token refresh, JWT parsing, Codex transport normalization, and model discovery. |
-| `@loginwithchatgpt/server` | A Web-standard handler for login, status, session, logout, models, and responses proxying. |
-| `@loginwithchatgpt/react` | `useLoginWithChatGPT()` and a styled `<LoginWithChatGPT />` widget. |
-| `@loginwithchatgpt/ai` | Vercel AI SDK providers for browser proxy mode and direct server-token mode. |
+| `@opencoredev/loginwithchatgpt-core` | Device-code OAuth, PKCE helpers, token refresh, JWT parsing, Codex transport normalization, and model discovery. |
+| `@opencoredev/loginwithchatgpt-server` | A Web-standard handler for login, status, session, logout, models, and responses proxying. |
+| `@opencoredev/loginwithchatgpt-react` | `useLoginWithChatGPT()` and a styled `<LoginWithChatGPT />` widget. |
+| `@opencoredev/loginwithchatgpt-ai` | Vercel AI SDK providers for browser proxy mode and direct server-token mode. |
 
 ## Quickstart
 
 ```bash
-bun add @loginwithchatgpt/server @loginwithchatgpt/react @loginwithchatgpt/ai
+bun add @opencoredev/loginwithchatgpt-server @opencoredev/loginwithchatgpt-react @opencoredev/loginwithchatgpt-ai
 bun add ai @ai-sdk/openai
 # or: npm install / pnpm add — the packages ship compiled ESM + types for Node 18+
 ```
@@ -33,7 +33,7 @@ bun add ai @ai-sdk/openai
 Mount the backend handler:
 
 ```ts
-import { createChatGPTHandler } from "@loginwithchatgpt/server";
+import { createChatGPTHandler } from "@opencoredev/loginwithchatgpt-server";
 import index from "./index.html";
 
 const auth = createChatGPTHandler({
@@ -57,7 +57,7 @@ Render the button:
 ```tsx
 "use client";
 
-import { LoginWithChatGPT } from "@loginwithchatgpt/react";
+import { LoginWithChatGPT } from "@opencoredev/loginwithchatgpt-react";
 
 export function SignIn() {
   return (
@@ -79,7 +79,7 @@ consent themselves.
 Use the browser-safe AI SDK proxy:
 
 ```ts
-import { createChatGPTProxyProvider } from "@loginwithchatgpt/ai";
+import { createChatGPTProxyProvider } from "@opencoredev/loginwithchatgpt-ai";
 import { streamText } from "ai";
 
 const chatgpt = createChatGPTProxyProvider({ basePath: "/api/chatgpt" });
@@ -111,7 +111,7 @@ const models = await auth.getModels(request);
 Use `getTokens()` for direct server-side AI SDK calls:
 
 ```ts
-import { createChatGPT } from "@loginwithchatgpt/ai";
+import { createChatGPT } from "@opencoredev/loginwithchatgpt-ai";
 
 const tokens = await auth.getTokens(request);
 if (!tokens) return new Response("Unauthorized", { status: 401 });

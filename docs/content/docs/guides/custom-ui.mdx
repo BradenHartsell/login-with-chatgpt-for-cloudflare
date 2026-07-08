@@ -18,7 +18,7 @@ consent step.
 ```tsx title="components/chatgpt-login.tsx"
 "use client";
 
-import { useLoginWithChatGPT } from "@loginwithchatgpt/react";
+import { useLoginWithChatGPT } from "@opencoredev/loginwithchatgpt-react";
 
 export function ChatGPTLogin() {
   const auth = useLoginWithChatGPT();
@@ -83,7 +83,7 @@ keeps the whole flow in one window.
 import {
   openLoginWithChatGPTConsentPopup,
   useLoginWithChatGPT,
-} from "@loginwithchatgpt/react";
+} from "@opencoredev/loginwithchatgpt-react";
 
 const auth = useLoginWithChatGPT();
 

@@ -1,5 +1,5 @@
 {
-  "name": "@loginwithchatgpt/example-demo",
+  "name": "@opencoredev/loginwithchatgpt-example-demo",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,10 +9,10 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^4",
-    "@loginwithchatgpt/ai": "workspace:*",
-    "@loginwithchatgpt/core": "workspace:*",
-    "@loginwithchatgpt/react": "workspace:*",
-    "@loginwithchatgpt/server": "workspace:*",
+    "@opencoredev/loginwithchatgpt-ai": "workspace:*",
+    "@opencoredev/loginwithchatgpt-core": "workspace:*",
+    "@opencoredev/loginwithchatgpt-react": "workspace:*",
+    "@opencoredev/loginwithchatgpt-server": "workspace:*",
     "@phosphor-icons/react": "^2.1.10",
     "ai": "^7",
     "react": "^19.0.0",

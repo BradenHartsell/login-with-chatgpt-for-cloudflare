@@ -3,7 +3,7 @@ title: AI SDK providers
 description: createChatGPTProxyProvider for the browser, createChatGPT for the server, and the shared provider API.
 ---
 
-`@loginwithchatgpt/ai` adapts the ChatGPT-backed Codex responses endpoint to
+`@opencoredev/loginwithchatgpt-ai` adapts the ChatGPT-backed Codex responses endpoint to
 the Vercel AI SDK (`ai` and `@ai-sdk/openai` are peer dependencies). Two
 factories, one provider shape:
 
@@ -32,7 +32,7 @@ your own API key instead.
 ## `createChatGPTProxyProvider(options?)`
 
 ```ts title="browser"
-import { createChatGPTProxyProvider } from "@loginwithchatgpt/ai";
+import { createChatGPTProxyProvider } from "@opencoredev/loginwithchatgpt-ai";
 import { streamText } from "ai";
 
 const chatgpt = createChatGPTProxyProvider();
@@ -59,7 +59,7 @@ setups need both `credentials` and a `fetch` wrapper; see the
 ## `createChatGPT(options)`
 
 ```ts title="server"
-import { createChatGPT } from "@loginwithchatgpt/ai";
+import { createChatGPT } from "@opencoredev/loginwithchatgpt-ai";
 import { streamText } from "ai";
 
 const tokens = await auth.getTokens(request);

@@ -7,7 +7,7 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@loginwithchatgpt/example-demo"],
+  "ignore": ["@opencoredev/loginwithchatgpt-example-demo"],
   "privatePackages": {
     "version": false,
     "tag": false

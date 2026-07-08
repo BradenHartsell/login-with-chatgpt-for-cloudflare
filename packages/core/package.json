@@ -1,5 +1,5 @@
 {
-  "name": "@loginwithchatgpt/core",
+  "name": "@opencoredev/loginwithchatgpt-core",
   "version": "0.1.0",
   "description": "Framework-agnostic engine for Login with ChatGPT: OAuth device-code + PKCE flows, token refresh, and the Codex responses transport.",
   "type": "module",

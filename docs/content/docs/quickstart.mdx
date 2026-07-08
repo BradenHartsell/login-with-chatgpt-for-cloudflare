@@ -14,18 +14,18 @@ backend.
 ### Install the packages
 
 ```bash tab="bun"
-bun add @loginwithchatgpt/server @loginwithchatgpt/react @loginwithchatgpt/ai ai @ai-sdk/openai
+bun add @opencoredev/loginwithchatgpt-server @opencoredev/loginwithchatgpt-react @opencoredev/loginwithchatgpt-ai ai @ai-sdk/openai
 ```
 
 ```bash tab="npm"
-npm install @loginwithchatgpt/server @loginwithchatgpt/react @loginwithchatgpt/ai ai @ai-sdk/openai
+npm install @opencoredev/loginwithchatgpt-server @opencoredev/loginwithchatgpt-react @opencoredev/loginwithchatgpt-ai ai @ai-sdk/openai
 ```
 
 ```bash tab="pnpm"
-pnpm add @loginwithchatgpt/server @loginwithchatgpt/react @loginwithchatgpt/ai ai @ai-sdk/openai
+pnpm add @opencoredev/loginwithchatgpt-server @opencoredev/loginwithchatgpt-react @opencoredev/loginwithchatgpt-ai ai @ai-sdk/openai
 ```
 
-`ai` and `@ai-sdk/openai` are peer dependencies of `@loginwithchatgpt/ai`.
+`ai` and `@ai-sdk/openai` are peer dependencies of `@opencoredev/loginwithchatgpt-ai`.
 
 </Step>
 <Step>
@@ -49,7 +49,7 @@ LWC_SECRET="use-the-output-of: openssl rand -hex 32"
 polling, logout, model listing, and the streaming proxy.
 
 ```ts tab="Bun" title="index.ts"
-import { createChatGPTHandler } from "@loginwithchatgpt/server";
+import { createChatGPTHandler } from "@opencoredev/loginwithchatgpt-server";
 import index from "./index.html";
 
 const auth = createChatGPTHandler({
@@ -68,7 +68,7 @@ Bun.serve({
 ```
 
 ```ts tab="Next.js" title="app/api/chatgpt/[...lwc]/route.ts"
-import { createChatGPTHandler } from "@loginwithchatgpt/server";
+import { createChatGPTHandler } from "@opencoredev/loginwithchatgpt-server";
 
 const auth = createChatGPTHandler({
   secret: process.env.LWC_SECRET,
@@ -92,7 +92,7 @@ The handler only needs Web-standard `Request`, `Response`, `fetch`, and
 ```tsx title="components/sign-in.tsx"
 "use client";
 
-import { LoginWithChatGPT } from "@loginwithchatgpt/react";
+import { LoginWithChatGPT } from "@opencoredev/loginwithchatgpt-react";
 
 export function SignIn() {
   return (
@@ -121,7 +121,7 @@ hardcoding a list. The proxy provider sends everything to your handler, which
 injects credentials from the session cookie.
 
 ```ts title="lib/chat.ts"
-import { createChatGPTProxyProvider } from "@loginwithchatgpt/ai";
+import { createChatGPTProxyProvider } from "@opencoredev/loginwithchatgpt-ai";
 import { streamText } from "ai";
 
 const chatgpt = createChatGPTProxyProvider();

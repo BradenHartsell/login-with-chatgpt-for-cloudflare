@@ -11,7 +11,7 @@ import {
   parseUser,
   pollDeviceCode,
   requestDeviceCode,
-} from "@loginwithchatgpt/core";
+} from "@opencoredev/loginwithchatgpt-core";
 import { decryptJson, encryptJson } from "./crypto.ts";
 
 /**

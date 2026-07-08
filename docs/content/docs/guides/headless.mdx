@@ -4,7 +4,7 @@ description: Run the device-code flow without a browser using the core primitive
 ---
 
 The browser widget is optional. For CLIs, scripts, and backend jobs, run the
-device-code flow directly with `@loginwithchatgpt/core` and hand the tokens
+device-code flow directly with `@opencoredev/loginwithchatgpt-core` and hand the tokens
 to the server-side AI provider.
 
 ## A complete CLI login
@@ -14,8 +14,8 @@ import {
   requestDeviceCode,
   resolveConfig,
   waitForDeviceTokens,
-} from "@loginwithchatgpt/core";
-import { createChatGPT } from "@loginwithchatgpt/ai";
+} from "@opencoredev/loginwithchatgpt-core";
+import { createChatGPT } from "@opencoredev/loginwithchatgpt-ai";
 import { streamText } from "ai";
 
 const config = resolveConfig();
@@ -75,7 +75,7 @@ If you want custom polling UI, drive the flow manually instead of
 `waitForDeviceTokens()`:
 
 ```ts
-import { exchangeDeviceAuthorization, pollDeviceCode } from "@loginwithchatgpt/core";
+import { exchangeDeviceAuthorization, pollDeviceCode } from "@opencoredev/loginwithchatgpt-core";
 
 const poll = await pollDeviceCode(config, device);
 if (poll.status === "authorized") {

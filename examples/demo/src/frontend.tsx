@@ -1,10 +1,10 @@
-import { ChatGPTProxyError, createChatGPTProxyProvider } from "@loginwithchatgpt/ai";
+import { ChatGPTProxyError, createChatGPTProxyProvider } from "@opencoredev/loginwithchatgpt-ai";
 import {
   ChatGPTMark,
   openLoginWithChatGPTConsentPopup,
   useLoginWithChatGPT,
   type UseLoginWithChatGPTResult,
-} from "@loginwithchatgpt/react";
+} from "@opencoredev/loginwithchatgpt-react";
 import {
   ArrowUpRight,
   BookOpen,

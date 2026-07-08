@@ -1,9 +1,9 @@
-# @loginwithchatgpt/core
+# @opencoredev/loginwithchatgpt-core
 
 Framework-agnostic engine for [Login with ChatGPT](../../README.md).
 
 Use this package directly when you are building a custom backend, CLI, storage
-adapter, or transport. Most apps should start with `@loginwithchatgpt/server`.
+adapter, or transport. Most apps should start with `@opencoredev/loginwithchatgpt-server`.
 
 ```ts
 import {
@@ -11,7 +11,7 @@ import {
   requestDeviceCode,
   resolveConfig,
   waitForDeviceTokens,
-} from "@loginwithchatgpt/core";
+} from "@opencoredev/loginwithchatgpt-core";
 
 const config = resolveConfig();
 const device = await requestDeviceCode(config);
