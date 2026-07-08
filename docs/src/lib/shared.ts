@@ -4,7 +4,7 @@ export const docsImageRoute = "/og/docs";
 export const docsContentRoute = "/llms.mdx/docs";
 
 export const gitConfig = {
-  user: "loginwithchatgpt",
+  user: "opencoredev",
   repo: "login-with-chatgpt",
   branch: "main",
 };
