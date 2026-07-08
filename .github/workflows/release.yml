@@ -10,9 +10,9 @@ on:
       - "package.json"
       - "packages/**"
 
-# contents/pull-requests: let the Changesets action open the "Version packages" PR
-# and push tags/releases. id-token: enables npm trusted publishing (OIDC) — no
-# NPM_TOKEN needed once each package has a trusted publisher configured on npm.
+# contents/pull-requests: let the Changesets action open the "Version packages"
+# PR and push tags/releases. id-token: kept so npm provenance can be enabled
+# later once the repo is public (harmless while unused).
 permissions:
   contents: write
   pull-requests: write
@@ -37,17 +37,14 @@ jobs:
         with:
           bun-version: 1.3.14
 
-      - name: Setup Node for npm trusted publishing
+      # registry-url makes setup-node write an .npmrc that authenticates with
+      # NODE_AUTH_TOKEN, so `changeset publish` can push to npm from CI.
+      - name: Setup Node
         uses: actions/setup-node@v6
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
-
-      # Trusted publishing (OIDC) requires npm >= 11.5.1; upgrade explicitly so
-      # this does not depend on the runner's bundled npm version.
-      - name: Ensure npm supports trusted publishing
-        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -67,3 +64,7 @@ jobs:
           # A PAT (CHANGESETS_TOKEN) lets the auto-created "Version packages" PR
           # trigger CI; falls back to the default token if it is not set.
           GITHUB_TOKEN: ${{ secrets.CHANGESETS_TOKEN || secrets.GITHUB_TOKEN }}
+          # npm auth for publishing. Set NPM_TOKEN as a repo secret (automation
+          # or granular token with publish rights to your package scope).
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
