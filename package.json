@@ -14,7 +14,7 @@
     "docs": "PORT=${PORT:-3001} bun run --cwd docs dev",
     "clean": "rm -rf packages/*/dist packages/*/*.tsbuildinfo",
     "build": "tsc -p packages/core/tsconfig.build.json && tsc -p packages/server/tsconfig.build.json && tsc -p packages/react/tsconfig.build.json && tsc -p packages/ai/tsconfig.build.json",
-    "release": "bun run build && (cd packages/core && bun publish) && (cd packages/server && bun publish) && (cd packages/react && bun publish) && (cd packages/ai && bun publish)"
+    "release": "bun run build && (cd packages/core && npm publish) && (cd packages/server && npm publish) && (cd packages/react && npm publish) && (cd packages/ai && npm publish)"
   },
   "devDependencies": {
     "@ai-sdk/openai": "^4",

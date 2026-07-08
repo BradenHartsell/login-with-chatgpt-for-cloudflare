@@ -1,6 +1,6 @@
 {
   "name": "@opencoredev/loginwithchatgpt-react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React hook and <LoginWithChatGPT /> button that drive the Login with ChatGPT device-code flow against your backend handler.",
   "type": "module",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "prepublishOnly": "rm -rf dist && bun run build"
   },
   "dependencies": {
-    "@opencoredev/loginwithchatgpt-core": "workspace:*"
+    "@opencoredev/loginwithchatgpt-core": "^0.1.1"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0"

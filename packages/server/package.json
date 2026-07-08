@@ -1,6 +1,6 @@
 {
   "name": "@opencoredev/loginwithchatgpt-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Server handler for Login with ChatGPT: device login, session status, logout, model discovery, and an authenticated Codex responses proxy.",
   "type": "module",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "prepublishOnly": "rm -rf dist && bun run build"
   },
   "dependencies": {
-    "@opencoredev/loginwithchatgpt-core": "workspace:*"
+    "@opencoredev/loginwithchatgpt-core": "^0.1.1"
   },
   "keywords": [
     "chatgpt",

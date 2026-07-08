@@ -1,6 +1,6 @@
 {
   "name": "@opencoredev/loginwithchatgpt-ai",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Vercel AI SDK provider for Login with ChatGPT with proxy/direct modes, model discovery, streaming, tools, and generateText/streamText.",
   "type": "module",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "prepublishOnly": "rm -rf dist && bun run build"
   },
   "dependencies": {
-    "@opencoredev/loginwithchatgpt-core": "workspace:*"
+    "@opencoredev/loginwithchatgpt-core": "^0.1.1"
   },
   "peerDependencies": {
     "@ai-sdk/openai": "^4.0.0",

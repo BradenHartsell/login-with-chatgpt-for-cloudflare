@@ -77,7 +77,7 @@ const server = Bun.serve({
     "/": index,
     "/api/chatgpt/*": (req) => auth.handler(req),
   },
-  development: { hmr: true, console: true },
+  development: process.env.NODE_ENV !== "production" && { hmr: true, console: true },
 });
 
 console.log(`\n  Login with ChatGPT demo → ${server.url}\n`);
