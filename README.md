@@ -117,6 +117,7 @@ The default body limit is 16 MiB because Workers have a fixed isolate memory cei
 
 - Session ids are random and signed with a domain-separated HMAC key.
 - OAuth tokens are encrypted with AES-GCM using a separate derived key and Durable Object identity as authenticated context.
+- Decoded ChatGPT identity claims are not persisted separately in plaintext. The safe status projection is reconstructed from the encrypted token envelope when needed.
 - The public API never exports access or refresh tokens.
 - A valid signed cookie maps to exactly one Durable Object.
 - Each Durable Object serializes stateful request setup, preventing concurrent use of the same rotating refresh token.
@@ -126,6 +127,8 @@ The default body limit is 16 MiB because Workers have a fixed isolate memory cei
 - The public Codex OAuth client id is used only for the OAuth client identity. The adapter identifies its actual harness separately through `originator` and `User-Agent`; do not claim `codex_cli_rs` unless the caller really is the Codex CLI.
 - Client-supplied `user` and `safety_identifier` fields are removed. The connected ChatGPT account remains the upstream subscription and allowance boundary, while deployers must keep their own application account and profile boundary server-side.
 - Client IP addresses are neither stored nor forwarded. There is no documented Codex subscription contract for an application to spoof an end-user network address, and Cloudflare egress rotation is not an identity or quota boundary.
+
+Encryption at rest is not operator-blind execution. The deployed Worker necessarily handles OAuth material in memory so it can refresh credentials and authenticate the user's request to OpenAI. Deployers must restrict production deployment access, review every release, and never claim that the Worker operator is cryptographically unable to access credentials.
 
 The package also exports `./openai`, `./session`, and `./crypto` for server-side Cloudflare integrations that need the provider transport without the cookie-facing HTTP adapter. Keep those imports on trusted Workers only. Never bundle them into a client application.
 

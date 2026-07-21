@@ -110,14 +110,17 @@ describe("Cloudflare login proxy", () => {
     });
 
     const object = env.CHATGPT_SESSIONS.getByName(sessionId ?? "missing");
-    const storedCiphertext = await runInDurableObject(object, (_instance, state) => {
+    const storedSession = await runInDurableObject(object, (_instance, state) => {
       const row = state.storage.sql
-        .exec<{ tokens_cipher: string | null }>("SELECT tokens_cipher FROM session_state WHERE singleton = 1")
+        .exec<{ tokens_cipher: string | null; user_json: string | null }>(
+          "SELECT tokens_cipher, user_json FROM session_state WHERE singleton = 1",
+        )
         .one();
-      return row.tokens_cipher;
+      return row;
     });
-    expect(storedCiphertext).toBeTypeOf("string");
-    expect(storedCiphertext).not.toContain("refresh-token-1");
+    expect(storedSession.tokens_cipher).toBeTypeOf("string");
+    expect(storedSession.tokens_cipher).not.toContain("refresh-token-1");
+    expect(storedSession.user_json).toBeNull();
 
     const [modelsA, modelsB] = await Promise.all([
       SELF.fetch("https://login.example.test/api/chatgpt/models", { headers: { cookie } }),

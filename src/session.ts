@@ -38,7 +38,6 @@ interface SessionRow {
   status: string;
   device_json: string | null;
   tokens_cipher: string | null;
-  user_json: string | null;
   created_at: number;
   updated_at: number;
   expires_at: number;
@@ -72,6 +71,9 @@ export class SessionStore {
         expires_at INTEGER NOT NULL
       )
     `);
+    // Older releases stored decoded identity claims in plaintext. The encrypted
+    // token envelope is sufficient to reconstruct the safe user projection.
+    this.sql.exec("UPDATE session_state SET user_json = NULL WHERE user_json IS NOT NULL");
     this.sql.exec(`
       CREATE TABLE IF NOT EXISTS rate_limits (
         bucket TEXT PRIMARY KEY,
@@ -83,7 +85,7 @@ export class SessionStore {
 
   async load(): Promise<SessionData | undefined> {
     const row = this.sql.exec<SessionRow>(
-      "SELECT status, device_json, tokens_cipher, user_json, created_at, updated_at, expires_at FROM session_state WHERE singleton = 1",
+      "SELECT status, device_json, tokens_cipher, created_at, updated_at, expires_at FROM session_state WHERE singleton = 1",
     ).toArray()[0];
     if (!row) return undefined;
     if (row.expires_at <= this.now()) {
@@ -92,7 +94,6 @@ export class SessionStore {
     }
     const status = parseStatus(row.status);
     const device = row.device_json ? parseDevice(row.device_json) : undefined;
-    const user = row.user_json ? parseUserRecord(row.user_json) : undefined;
     let tokens: ChatGPTTokens | undefined;
     if (row.tokens_cipher) {
       const decrypted = await decryptJson(this.secret, this.encryptionContext, row.tokens_cipher);
@@ -103,7 +104,6 @@ export class SessionStore {
       status,
       device,
       tokens,
-      user,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };
@@ -130,7 +130,7 @@ export class SessionStore {
       data.status,
       data.device ? JSON.stringify(data.device) : null,
       tokensCipher,
-      data.user ? JSON.stringify(data.user) : null,
+      null,
       data.createdAt,
       updatedAt,
       updatedAt + ttlMs,
@@ -192,8 +192,10 @@ export class SessionService {
     return { device, data };
   }
 
-  load(): Promise<SessionData | undefined> {
-    return this.store.load();
+  async load(): Promise<SessionData | undefined> {
+    const data = await this.store.load();
+    if (data?.tokens) data.user = parseUser(data.tokens.idToken);
+    return data;
   }
 
   async advance(): Promise<SessionData> {
@@ -291,19 +293,6 @@ function parseDevice(value: string): DeviceState {
     throw new Error("Stored device state is invalid.");
   }
   return parsed as unknown as DeviceState;
-}
-
-function parseUserRecord(value: string): ChatGPTUser {
-  const parsed: unknown = JSON.parse(value);
-  if (!isRecord(parsed) || typeof parsed["accountId"] !== "string") {
-    throw new Error("Stored user profile is invalid.");
-  }
-  for (const field of ["email", "name", "plan"] as const) {
-    if (parsed[field] !== undefined && typeof parsed[field] !== "string") {
-      throw new Error("Stored user profile is invalid.");
-    }
-  }
-  return parsed as unknown as ChatGPTUser;
 }
 
 function parseTokens(value: unknown): ChatGPTTokens | undefined {
