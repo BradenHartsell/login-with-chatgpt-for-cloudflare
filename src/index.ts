@@ -1,6 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
-import { type CookieSameSite, clearSessionCookie, readCookie, sessionCookie } from "./cookies.ts";
-import { randomSessionId, signSessionId, verifySessionId } from "./crypto.ts";
+import { type CookieSameSite, clearSessionCookie, readCookie, sessionCookie } from "./cookies.js";
+import { randomSessionId, signSessionId, verifySessionId } from "./crypto.js";
 import {
   type OpenAIConfig,
   type ReasoningEffort,
@@ -11,8 +11,8 @@ import {
   normalizeResponsesBody,
   proxyCodexResponses,
   resolveOpenAIConfig,
-} from "./openai.ts";
-import { SessionService, SessionStore } from "./session.ts";
+} from "./openai.js";
+import { SessionService, SessionStore } from "./session.js";
 
 const METHODS = new Map([
   ["/login", "POST"],
@@ -324,8 +324,8 @@ async function prepareResponsesPayload(
   options: {
     defaultModel: string;
     maxRequestBytes: number;
-    serviceTier?: ServiceTier;
-    reasoningEffort?: ReasoningEffort;
+    serviceTier?: ServiceTier | undefined;
+    reasoningEffort?: ReasoningEffort | undefined;
   },
 ): Promise<string | Response> {
   const contentLength = Number(request.headers.get("content-length"));

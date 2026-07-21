@@ -1,4 +1,4 @@
-import { decryptJson, encryptJson } from "./crypto.ts";
+import { decryptJson, encryptJson } from "./crypto.js";
 import {
   type ChatGPTTokens,
   type ChatGPTUser,
@@ -11,7 +11,7 @@ import {
   parseUser,
   pollDeviceCode,
   requestDeviceCode,
-} from "./openai.ts";
+} from "./openai.js";
 
 const PENDING_SESSION_TTL_MS = 30 * 60 * 1000;
 
@@ -26,9 +26,9 @@ export interface DeviceState {
 
 export interface SessionData {
   status: LoginStatus;
-  device?: DeviceState;
-  tokens?: ChatGPTTokens;
-  user?: ChatGPTUser;
+  device?: DeviceState | undefined;
+  tokens?: ChatGPTTokens | undefined;
+  user?: ChatGPTUser | undefined;
   createdAt: number;
   updatedAt: number;
 }

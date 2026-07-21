@@ -20,17 +20,17 @@ export type ServiceTier = "auto" | "default" | "flex" | "priority" | "fast";
 
 export interface ChatGPTTokens {
   accessToken: string;
-  refreshToken?: string;
-  idToken?: string;
-  accountId?: string;
-  expiresAt?: number;
+  refreshToken?: string | undefined;
+  idToken?: string | undefined;
+  accountId?: string | undefined;
+  expiresAt?: number | undefined;
 }
 
 export interface ChatGPTUser {
   accountId: string;
-  email?: string;
-  name?: string;
-  plan?: string;
+  email?: string | undefined;
+  name?: string | undefined;
+  plan?: string | undefined;
 }
 
 export interface DeviceCode {
@@ -63,17 +63,17 @@ export interface OpenAIConfig {
 }
 
 export interface ResponsesOptions {
-  instructions?: string;
-  reasoningEffort?: ReasoningEffort;
-  reasoningSummary?: string;
-  textVerbosity?: "low" | "medium" | "high";
-  serviceTier?: ServiceTier;
+  instructions?: string | undefined;
+  reasoningEffort?: ReasoningEffort | undefined;
+  reasoningSummary?: string | undefined;
+  textVerbosity?: "low" | "medium" | "high" | undefined;
+  serviceTier?: ServiceTier | undefined;
 }
 
 export class ChatGPTAuthError extends Error {
   readonly code: string;
-  readonly status?: number;
-  readonly body?: string;
+  readonly status?: number | undefined;
+  readonly body?: string | undefined;
 
   constructor(code: string, message: string, options: { status?: number; body?: string; cause?: unknown } = {}) {
     super(message, options.cause === undefined ? undefined : { cause: options.cause });
@@ -307,7 +307,7 @@ export function proxyCodexResponses(
     method: "POST",
     headers: { "content-type": "application/json", accept: "text/event-stream" },
     body,
-    signal,
+    ...(signal ? { signal } : {}),
   });
 }
 

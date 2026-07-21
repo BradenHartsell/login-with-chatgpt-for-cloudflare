@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "allowImportingTsExtensions": true,
+    "exactOptionalPropertyTypes": true,
     "isolatedModules": true,
     "lib": ["ES2023"],
     "module": "ESNext",
