@@ -15,8 +15,21 @@ const DEFAULT_INSTRUCTIONS =
   "You are a helpful assistant powered by the user's ChatGPT account. Answer the user's request directly and helpfully.";
 
 export type LoginStatus = "unauthenticated" | "pending" | "authenticated" | "expired" | "error";
-export type ReasoningEffort = "none" | "low" | "medium" | "high" | "xhigh";
+export type ReasoningEffort = "none" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
 export type ServiceTier = "auto" | "default" | "flex" | "priority" | "fast";
+
+export interface CodexModelReasoningEffort {
+  effort: ReasoningEffort;
+  description?: string;
+}
+
+export interface CodexModelCatalogItem {
+  slug: string;
+  displayName?: string;
+  description?: string;
+  defaultReasoningEffort?: ReasoningEffort;
+  supportedReasoningEfforts: CodexModelReasoningEffort[];
+}
 
 export interface ChatGPTTokens {
   accessToken: string;
@@ -287,6 +300,13 @@ export async function ensureFreshTokens(
 }
 
 export async function listCodexModels(config: OpenAIConfig, tokens: ChatGPTTokens): Promise<string[]> {
+  return (await listCodexModelCatalog(config, tokens)).map((model) => model.slug);
+}
+
+export async function listCodexModelCatalog(
+  config: OpenAIConfig,
+  tokens: ChatGPTTokens,
+): Promise<CodexModelCatalogItem[]> {
   const response = await codexRequest(config, tokens, "/models", { method: "GET", headers: { accept: "application/json" } });
   if (!response.ok) {
     throw new ChatGPTAuthError("models_request_failed", `Model list request failed (${response.status}).`, {
@@ -294,7 +314,7 @@ export async function listCodexModels(config: OpenAIConfig, tokens: ChatGPTToken
       body: await safeText(response),
     });
   }
-  return extractModelSlugs(await response.json<unknown>());
+  return extractModelCatalog(await response.json<unknown>());
 }
 
 export function proxyCodexResponses(
@@ -374,14 +394,14 @@ function filterCodexInput(input: unknown[]): unknown[] {
     });
 }
 
-function extractModelSlugs(value: unknown): string[] {
+function extractModelCatalog(value: unknown): CodexModelCatalogItem[] {
   const candidates = Array.isArray(value)
     ? value
     : isRecord(value)
       ? [value["models"], value["data"], value["items"], value["available_models"]].find(Array.isArray) ?? []
       : [];
   const seen = new Set<string>();
-  const output: string[] = [];
+  const output: CodexModelCatalogItem[] = [];
   for (const item of candidates) {
     const candidate = typeof item === "string"
       ? item
@@ -391,10 +411,50 @@ function extractModelSlugs(value: unknown): string[] {
     if (typeof candidate !== "string") continue;
     const slug = candidate.trim();
     if (!slug || seen.has(slug)) continue;
+    const itemRecord = isRecord(item) ? item : undefined;
+    const displayName = stringField(itemRecord?.["display_name"] ?? itemRecord?.["displayName"]);
+    const description = stringField(itemRecord?.["description"]);
+    const defaultReasoningEffort = reasoningEffort(
+      itemRecord?.["default_reasoning_level"] ?? itemRecord?.["defaultReasoningEffort"],
+    );
     seen.add(slug);
-    output.push(slug);
+    output.push({
+      slug,
+      ...(displayName ? { displayName } : {}),
+      ...(description ? { description } : {}),
+      ...(defaultReasoningEffort ? { defaultReasoningEffort } : {}),
+      supportedReasoningEfforts: reasoningEfforts(
+        itemRecord?.["supported_reasoning_levels"] ?? itemRecord?.["supportedReasoningEfforts"],
+      ),
+    });
   }
   return output;
+}
+
+function reasoningEfforts(value: unknown): CodexModelReasoningEffort[] {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<ReasoningEffort>();
+  const output: CodexModelReasoningEffort[] = [];
+  for (const item of value) {
+    const itemRecord = isRecord(item) ? item : undefined;
+    const effort = reasoningEffort(itemRecord?.["effort"] ?? itemRecord?.["reasoningEffort"] ?? item);
+    if (!effort || seen.has(effort)) continue;
+    const description = stringField(itemRecord?.["description"]);
+    seen.add(effort);
+    output.push({ effort, ...(description ? { description } : {}) });
+  }
+  return output;
+}
+
+function reasoningEffort(value: unknown): ReasoningEffort | undefined {
+  return value === "none" || value === "minimal" || value === "low" || value === "medium" ||
+    value === "high" || value === "xhigh" || value === "max"
+    ? value
+    : undefined;
+}
+
+function stringField(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
 interface RawTokenResponse {

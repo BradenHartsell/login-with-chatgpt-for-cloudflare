@@ -93,6 +93,8 @@ The `secrets.required` declaration makes deployment fail closed when `SESSION_SE
 4. After the status becomes `authenticated`, use `/models` and `/responses` with the same cookie.
 5. Call `POST /api/chatgpt/logout` when the user disconnects the account.
 
+`GET /api/chatgpt/models` returns both a compatibility `models` slug list and `modelDetails`. Each detail preserves the upstream display name, description, default reasoning effort, and the reasoning efforts advertised for that model. Send a selected supported effort with `x-login-with-chatgpt-reasoning-effort` on the Responses request.
+
 Native clients must use a cookie jar or preserve the `lwc_session` cookie explicitly. The application's account session and this ChatGPT connection session are separate security boundaries. Authenticate the application user first, then expose these routes only through the application account that owns the connection.
 
 ## Configuration

@@ -7,7 +7,7 @@ import {
   type ServiceTier,
   ChatGPTAuthError,
   DEFAULT_MODEL,
-  listCodexModels,
+  listCodexModelCatalog,
   normalizeResponsesBody,
   proxyCodexResponses,
   resolveOpenAIConfig,
@@ -23,7 +23,15 @@ const METHODS = new Map([
   ["/responses", "POST"],
 ]);
 const SERVICE_TIERS = new Set<ServiceTier>(["auto", "default", "flex", "priority", "fast"]);
-const REASONING_EFFORTS = new Set<ReasoningEffort>(["none", "low", "medium", "high", "xhigh"]);
+const REASONING_EFFORTS = new Set<ReasoningEffort>([
+  "none",
+  "minimal",
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+  "max",
+]);
 
 export class ChatGPTSession extends DurableObject<Env> {
   private readonly sessions: SessionService;
@@ -102,8 +110,8 @@ export class ChatGPTSession extends DurableObject<Env> {
   private async handleModels(): Promise<Response> {
     const tokens = await this.sessions.freshTokens();
     if (!tokens?.accessToken || !tokens.accountId) return json({ error: "not_authenticated" }, { status: 401 });
-    const models = await listCodexModels(this.openAIConfig, tokens);
-    return json({ models });
+    const modelDetails = await listCodexModelCatalog(this.openAIConfig, tokens);
+    return json({ models: modelDetails.map((model) => model.slug), modelDetails });
   }
 
   private async handleResponses(request: Request): Promise<Response> {

@@ -61,7 +61,30 @@ export default defineProject({
             });
           }
           if (url.origin === "https://chatgpt.com" && url.pathname === "/backend-api/codex/models") {
-            return Response.json({ models: [{ slug: "gpt-5.5" }, { slug: "gpt-5.4" }] });
+            return Response.json({
+              models: [
+                {
+                  slug: "gpt-5.5",
+                  display_name: "GPT-5.5",
+                  description: "Frontier model",
+                  default_reasoning_level: "medium",
+                  supported_reasoning_levels: [
+                    { effort: "low", description: "Fast" },
+                    { effort: "medium", description: "Balanced" },
+                    { effort: "high", description: "Deep" },
+                    { effort: "xhigh", description: "Extra deep" },
+                  ],
+                },
+                {
+                  slug: "gpt-5.4",
+                  display_name: "GPT-5.4",
+                  default_reasoning_level: "high",
+                  supported_reasoning_levels: [
+                    { effort: "high", description: "Deep" },
+                  ],
+                },
+              ],
+            });
           }
           if (url.origin === "https://chatgpt.com" && url.pathname === "/backend-api/codex/responses") {
             const body = await request.json<Record<string, unknown>>();

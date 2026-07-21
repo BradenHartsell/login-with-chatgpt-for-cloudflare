@@ -128,8 +128,31 @@ describe("Cloudflare login proxy", () => {
     ]);
     expect(modelsA.status).toBe(200);
     expect(modelsB.status).toBe(200);
-    await expect(modelsA.json()).resolves.toEqual({ models: ["gpt-5.5", "gpt-5.4"] });
-    await expect(modelsB.json()).resolves.toEqual({ models: ["gpt-5.5", "gpt-5.4"] });
+    const expectedModels = {
+      models: ["gpt-5.5", "gpt-5.4"],
+      modelDetails: [
+        {
+          slug: "gpt-5.5",
+          displayName: "GPT-5.5",
+          description: "Frontier model",
+          defaultReasoningEffort: "medium",
+          supportedReasoningEfforts: [
+            { effort: "low", description: "Fast" },
+            { effort: "medium", description: "Balanced" },
+            { effort: "high", description: "Deep" },
+            { effort: "xhigh", description: "Extra deep" },
+          ],
+        },
+        {
+          slug: "gpt-5.4",
+          displayName: "GPT-5.4",
+          defaultReasoningEffort: "high",
+          supportedReasoningEfforts: [{ effort: "high", description: "Deep" }],
+        },
+      ],
+    };
+    await expect(modelsA.json()).resolves.toEqual(expectedModels);
+    await expect(modelsB.json()).resolves.toEqual(expectedModels);
 
     const oversized = await SELF.fetch("https://login.example.test/api/chatgpt/responses", {
       method: "POST",
