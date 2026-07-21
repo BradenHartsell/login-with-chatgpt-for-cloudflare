@@ -1,27 +1,36 @@
 {
-  "name": "login-with-chatgpt-monorepo",
+  "name": "login-with-chatgpt-for-cloudflare",
+  "version": "0.1.0",
+  "description": "Cloudflare Worker fork of opencoredev/login-with-chatgpt with encrypted SQLite Durable Object sessions.",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "packages/*",
-    "examples/*"
-  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BradenHartsell/login-with-chatgpt-for-cloudflare.git"
+  },
+  "homepage": "https://github.com/BradenHartsell/login-with-chatgpt-for-cloudflare#readme",
+  "bugs": {
+    "url": "https://github.com/BradenHartsell/login-with-chatgpt-for-cloudflare/issues"
+  },
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "dev": "PORT=${PORT:-3001} bun run --cwd docs dev",
-    "typecheck": "tsc --build --pretty",
-    "test": "bun test packages",
-    "demo": "bun --cwd examples/demo run dev",
-    "docs": "PORT=${PORT:-3001} bun run --cwd docs dev",
-    "clean": "rm -rf packages/*/dist packages/*/*.tsbuildinfo",
-    "build": "tsc -p packages/core/tsconfig.build.json && tsc -p packages/server/tsconfig.build.json && tsc -p packages/react/tsconfig.build.json && tsc -p packages/ai/tsconfig.build.json",
-    "release": "bun run build && (cd packages/core && npm publish) && (cd packages/server && npm publish) && (cd packages/react && npm publish) && (cd packages/ai && npm publish)"
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:dry-run": "wrangler deploy --dry-run",
+    "types": "wrangler types",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run types && npm run typecheck && npm test && npm run deploy:dry-run"
   },
   "devDependencies": {
-    "@ai-sdk/openai": "^4",
-    "@types/bun": "latest",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "ai": "^7",
-    "typescript": "^5.6.0"
+    "@cloudflare/vitest-pool-workers": "0.18.6",
+    "@cloudflare/workers-types": "5.20260719.1",
+    "@types/node": "^26.1.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10",
+    "wrangler": "4.112.0"
   }
 }

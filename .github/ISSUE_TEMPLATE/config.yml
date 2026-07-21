@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Private security report
+    url: https://github.com/BradenHartsell/login-with-chatgpt-for-cloudflare/security/advisories/new
+    about: Report vulnerabilities and credential exposure privately
+  - name: Upstream project
+    url: https://github.com/opencoredev/login-with-chatgpt/issues
+    about: Report cross-runtime SDK, React, AI SDK, or upstream documentation issues

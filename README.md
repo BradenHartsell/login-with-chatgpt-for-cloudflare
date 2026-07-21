@@ -1,56 +1,152 @@
-<h1 align="center">&lt;LoginWithChatGPT /&gt;</h1>
+# Unofficial Cloudflare Worker adapter for login-with-chatgpt
 
-<p align="center">A simple SDK that lets your users log in with their ChatGPT account.</p>
+A Cloudflare-only login proxy for applications that let users connect their own ChatGPT account. It runs as one Worker with one SQLite Durable Object per login session. OAuth credentials stay inside the Durable Object and never cross the public API boundary.
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/@opencoredev/loginwithchatgpt-core"><img alt="npm version" src="https://shieldcn.dev/npm/@opencoredev/loginwithchatgpt-core.svg?variant=secondary&mode=dark" /></a>
-  <a href="https://github.com/opencoredev/login-with-chatgpt/stargazers"><img alt="GitHub stars" src="https://shieldcn.dev/github/opencoredev/login-with-chatgpt/stars.svg?variant=branded&mode=dark" /></a>
-  <a href="https://x.com/leodev"><img alt="Follow @leodev on X" src="https://shieldcn.dev/x/follow/leodev.svg?variant=branded&mode=dark" /></a>
-</p>
+> [!IMPORTANT]
+> This is an independent, community-maintained Cloudflare fork of [opencoredev/login-with-chatgpt](https://github.com/opencoredev/login-with-chatgpt). It is not created, supported, certified, or endorsed by OpenAI or Cloudflare. For the cross-runtime SDK, React components, AI SDK adapters, Bun server, documentation site, and Docker support, use the [original project](https://github.com/opencoredev/login-with-chatgpt).
 
-- Users bring their own ChatGPT subscription
-- Tokens never touch the browser: HttpOnly cookie only
-- Works with the Vercel AI SDK: `streamText()` straight from the client
-- Generates and edits images with size, quality, format, masks, and streaming previews
-- Open source, MIT licensed
+This repository was derived from upstream commit [`7b3deeb`](https://github.com/opencoredev/login-with-chatgpt/commit/7b3deeb6e6bd539d594947f258a2fc26cf8fe866) and rewritten as a focused Cloudflare Worker. The upstream copyright and MIT license are preserved in [LICENSE](./LICENSE), with provenance recorded in [NOTICE.md](./NOTICE.md).
 
-The handler keeps tokens behind the proxy path by default. The browser gets a session cookie, asks your backend which models the account has, and streams from there.
+## Architecture
 
-## Install
-
-```bash
-bun add @opencoredev/loginwithchatgpt-server @opencoredev/loginwithchatgpt-react @opencoredev/loginwithchatgpt-ai
+```text
+Client
+  -> Cloudflare Worker
+       -> validates route, method, origin, and signed session cookie
+       -> routes by opaque session id
+       -> ChatGPTSession Durable Object
+            -> encrypted OAuth credentials in private SQLite storage
+            -> serialized refresh and proxy setup
+            -> OpenAI device authorization and token endpoints
+            -> streamed ChatGPT Codex responses
 ```
 
-npm and pnpm work too. Everything ships as ESM with types for Node 18+.
+The Worker owns the public HTTP and cookie boundary. A `ChatGPTSession` Durable Object owns all state and mutations for exactly one ChatGPT login. Its SQLite database is the canonical session store. No KV namespace, external database, container, or generic application server is required.
 
-## Packages
+## Routes
 
-| Package | Does |
-| --- | --- |
-| `@opencoredev/loginwithchatgpt-core` | OAuth, token refresh, model discovery |
-| `@opencoredev/loginwithchatgpt-server` | Backend handler: login, session, logout, models, responses proxy |
-| `@opencoredev/loginwithchatgpt-react` | The `<LoginWithChatGPT />` button and hook |
-| `@opencoredev/loginwithchatgpt-ai` | Vercel AI SDK providers |
+All auth routes use `BASE_PATH`, which defaults to `/api/chatgpt`.
 
-## Docs
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/chatgpt/login` | Start or reuse a device-code login and issue a signed session cookie |
+| `GET` | `/api/chatgpt/status` | Poll the device flow and refresh an authenticated session when needed |
+| `GET` | `/api/chatgpt/session` | Read the current public session without contacting OpenAI |
+| `POST` | `/api/chatgpt/logout` | Delete the Durable Object session state and clear the cookie |
+| `GET` | `/api/chatgpt/models` | List models available to the connected ChatGPT account |
+| `POST` | `/api/chatgpt/responses` | Proxy a Responses request and stream the upstream response |
+| `GET` | `/health` | Worker health check |
 
-Start with the [quickstart](./docs/content/docs/quickstart.mdx). The [security model](./docs/content/docs/concepts/security.mdx) explains how tokens stay on your server, and the [production checklist](./docs/content/docs/guides/production.mdx) is there for when you deploy.
+## Local setup
 
-## Agent skill
+Requirements:
 
-Using Claude Code, Cursor, or Codex? Install the [agent skill](./skills/login-with-chatgpt/SKILL.md) so your agent wires the SDK correctly: no invented API keys, and no assuming one model slug works for every account.
+- Node.js 24 or newer
+- A Cloudflare account for deployment
 
-```bash
-npx skills add opencoredev/login-with-chatgpt
+Install dependencies:
+
+```sh
+npm install
 ```
 
-Then just ask your agent to "add Login with ChatGPT" and it will mount the handler, render the button, and stream through the proxy the right way. Also on [skills.sh](https://skills.sh/opencoredev/login-with-chatgpt).
+Create a local secret:
 
-## Star history
+```sh
+node -e "console.log('SESSION_SECRET=' + require('node:crypto').randomBytes(48).toString('base64url'))" > .dev.vars
+```
 
-<p align="center">
-  <a href="https://github.com/opencoredev/login-with-chatgpt/stargazers"><img alt="Star history" src="https://shieldcn.dev/chart/github/stars/opencoredev/login-with-chatgpt.svg?mode=dark" /></a>
-</p>
+Start the local Worker:
 
-<p align="center"><sub><a href="./LICENSE">MIT License</a> · Built by <a href="https://x.com/leodev">@leodev</a></sub></p>
+```sh
+npm run dev
+```
+
+Run the complete local validation:
+
+```sh
+npm run check
+```
+
+## Deploy
+
+Generate a secret value locally:
+
+```sh
+node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"
+```
+
+Store that value as the Worker secret, then deploy:
+
+```sh
+npx wrangler secret put SESSION_SECRET
+npm run deploy
+```
+
+The `secrets.required` declaration makes deployment fail closed when `SESSION_SECRET` is missing. The Worker also rejects secrets shorter than 32 characters. Do not place its value in `wrangler.jsonc`.
+
+## Client flow
+
+1. Call `POST /api/chatgpt/login` and retain the `Set-Cookie` value.
+2. Show `verificationUrl` and `userCode` to the user.
+3. Poll `GET /api/chatgpt/status` no faster than the returned `interval`.
+4. After the status becomes `authenticated`, use `/models` and `/responses` with the same cookie.
+5. Call `POST /api/chatgpt/logout` when the user disconnects the account.
+
+Native clients must use a cookie jar or preserve the `lwc_session` cookie explicitly. A VXBE account session and this ChatGPT connection session are separate security boundaries. VXBE should authenticate its own user first, then expose these routes only through the account and profile owner that is allowed to use the connection.
+
+## Configuration
+
+Non-secret settings live in `wrangler.jsonc`:
+
+- `BASE_PATH`: public route prefix
+- `COOKIE_NAME`: signed session cookie name
+- `COOKIE_SAME_SITE`: `Lax` by default, or `None` for an HTTPS cross-origin browser client
+- `DEFAULT_MODEL`: model used when a Responses body omits `model`
+- `ALLOWED_ORIGINS`: comma-separated browser origins allowed for non-GET requests
+- `SESSION_TTL_SECONDS`: authenticated session lifetime
+- `MAX_REQUEST_BYTES`: bounded JSON body size for the Responses proxy
+- `RESPONSES_RATE_LIMIT`: per-session request count
+- `RESPONSES_RATE_WINDOW_SECONDS`: fixed rate window
+
+The default body limit is 16 MiB because Workers have a fixed isolate memory ceiling and JSON plus base64 inputs require multiple in-memory representations. Larger media workflows should stage assets in object storage and send references instead of raising this value without memory testing.
+
+## Security properties
+
+- Session ids are random and signed with a domain-separated HMAC key.
+- OAuth tokens are encrypted with AES-GCM using a separate derived key and Durable Object identity as authenticated context.
+- The public API never exports access or refresh tokens.
+- A valid signed cookie maps to exactly one Durable Object.
+- Each Durable Object serializes stateful request setup, preventing concurrent use of the same rotating refresh token.
+- Rate counters and session state are strongly consistent inside the same SQLite Durable Object.
+- Browser writes are same-origin by default and fail with `403` for untrusted origins.
+- Responses are streamed from the Durable Object through the outer Worker without buffering the upstream event stream.
+
+See [SECURITY.md](./SECURITY.md) for private vulnerability reporting and deployment-specific security responsibilities.
+
+## Compatibility and responsibility
+
+The OAuth and Codex request shapes in this project follow the public behavior used by OpenAI's Codex clients and the original project. They are separate from the standard OpenAI API and may change independently. Operators are responsible for monitoring upstream behavior, protecting their Cloudflare account, and complying with the current [OpenAI terms and policies](https://openai.com/policies/) and [Cloudflare terms](https://www.cloudflare.com/terms/).
+
+Do not describe a deployment as an official OpenAI or Cloudflare integration. OpenAI, ChatGPT, and related marks belong to OpenAI. Review the current [OpenAI brand guidelines](https://openai.com/brand/) before naming or marketing a product built with this project.
+
+## Validation
+
+```sh
+npm run types
+npm run typecheck
+npm test
+npm run deploy:dry-run
+```
+
+The Worker tests run in Cloudflare's Workers Vitest pool and cover durable cookie routing, origin rejection, tampered cookies, device authorization, encrypted credential storage, concurrent refresh serialization, model discovery, bounded bodies, streamed responses, and logout cleanup.
+
+## Contributing and support
+
+Cloudflare-specific bug reports and contributions are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening an issue or pull request. Bugs in the cross-runtime SDK or its React and AI SDK packages should be reported to the [upstream repository](https://github.com/opencoredev/login-with-chatgpt/issues).
+
+This project is provided without a hosted service or support guarantee. Deployers own their Worker, Durable Object data, secrets, costs, user disclosures, and incident response.
+
+## License
+
+MIT. The original copyright notice remains in [LICENSE](./LICENSE). Cloudflare-specific provenance and acknowledgements are in [NOTICE.md](./NOTICE.md).

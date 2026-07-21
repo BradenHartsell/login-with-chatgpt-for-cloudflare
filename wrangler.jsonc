@@ -1,0 +1,38 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "login-with-chatgpt-for-cloudflare",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-20",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "CHATGPT_SESSIONS",
+        "class_name": "ChatGPTSession"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["ChatGPTSession"]
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "secrets": {
+    "required": ["SESSION_SECRET"]
+  },
+  "vars": {
+    "ALLOWED_ORIGINS": "",
+    "BASE_PATH": "/api/chatgpt",
+    "COOKIE_NAME": "lwc_session",
+    "COOKIE_SAME_SITE": "Lax",
+    "DEFAULT_MODEL": "gpt-5.5",
+    "MAX_REQUEST_BYTES": 16777216,
+    "RESPONSES_RATE_LIMIT": 30,
+    "RESPONSES_RATE_WINDOW_SECONDS": 60,
+    "SESSION_TTL_SECONDS": 2592000
+  }
+}

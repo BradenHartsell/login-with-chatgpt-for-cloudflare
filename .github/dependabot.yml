@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      cloudflare-tooling:
+        patterns:
+          - "@cloudflare/*"
+          - wrangler
+      test-tooling:
+        patterns:
+          - vitest
+          - typescript
