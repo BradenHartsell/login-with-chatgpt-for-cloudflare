@@ -128,8 +128,6 @@ The default body limit is 16 MiB because Workers have a fixed isolate memory cei
 - Client-supplied `user` and `safety_identifier` fields are removed. The connected ChatGPT account remains the upstream subscription and allowance boundary, while deployers must keep their own application account and profile boundary server-side.
 - Client IP addresses are neither stored nor forwarded. There is no documented Codex subscription contract for an application to spoof an end-user network address, and Cloudflare egress rotation is not an identity or quota boundary.
 
-Encryption at rest is not operator-blind execution. The deployed Worker necessarily handles OAuth material in memory so it can refresh credentials and authenticate the user's request to OpenAI. Deployers must restrict production deployment access, review every release, and never claim that the Worker operator is cryptographically unable to access credentials.
-
 The package also exports `./openai`, `./session`, and `./crypto` for server-side Cloudflare integrations that need the provider transport without the cookie-facing HTTP adapter. Keep those imports on trusted Workers only. Never bundle them into a client application.
 
 See [SECURITY.md](./SECURITY.md) for private vulnerability reporting and deployment-specific security responsibilities.
