@@ -129,8 +129,13 @@ describe("Cloudflare login proxy", () => {
 
     const responses = await SELF.fetch("https://login.example.test/api/chatgpt/responses", {
       method: "POST",
-      headers: { cookie, origin: "https://login.example.test", "content-type": "application/json" },
-      body: JSON.stringify({ input: "hello" }),
+      headers: {
+        cookie,
+        origin: "https://login.example.test",
+        "content-type": "application/json",
+        "cf-connecting-ip": "203.0.113.42",
+      },
+      body: JSON.stringify({ input: "hello", user: "client-spoofed-user" }),
     });
     expect(responses.status).toBe(200);
     expect(responses.headers.get("content-type")).toBe("text/event-stream");

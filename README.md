@@ -121,6 +121,10 @@ The default body limit is 16 MiB because Workers have a fixed isolate memory cei
 - Rate counters and session state are strongly consistent inside the same SQLite Durable Object.
 - Browser writes are same-origin by default and fail with `403` for untrusted origins.
 - Responses are streamed from the Durable Object through the outer Worker without buffering the upstream event stream.
+- Every Responses request receives a server-owned pseudonymous `user` value. Clients cannot replace it with another identity. OpenAI documents this field as an abuse-monitoring signal.
+- When Cloudflare supplies `CF-Connecting-IP`, the Worker forwards that address as `X-Real-IP` without storing or logging it. This is best-effort network context, not a promise that an upstream service will consume it.
+
+The package also exports `./openai`, `./session`, and `./crypto` for server-side Cloudflare integrations that need the provider transport without the cookie-facing HTTP adapter. Keep those imports on trusted Workers only. Never bundle them into a client application.
 
 See [SECURITY.md](./SECURITY.md) for private vulnerability reporting and deployment-specific security responsibilities.
 

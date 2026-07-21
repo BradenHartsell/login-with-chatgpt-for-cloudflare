@@ -7,6 +7,12 @@ export async function signSessionId(value: string, secret: string): Promise<stri
   return `${value}.${base64UrlEncode(new Uint8Array(signature))}`;
 }
 
+export async function pseudonymousSessionId(value: string, secret: string): Promise<string> {
+  const key = await importHmacKey(secret);
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(`chatgpt-end-user:${value}`));
+  return `chatgpt_${base64UrlEncode(new Uint8Array(signature))}`;
+}
+
 export async function verifySessionId(signed: string, secret: string): Promise<string | undefined> {
   const separator = signed.lastIndexOf(".");
   if (separator <= 0) return undefined;

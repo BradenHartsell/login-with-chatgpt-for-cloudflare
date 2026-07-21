@@ -65,7 +65,13 @@ export default defineProject({
           }
           if (url.origin === "https://chatgpt.com" && url.pathname === "/backend-api/codex/responses") {
             const body = await request.json<Record<string, unknown>>();
-            if (body["store"] !== false || body["model"] !== "gpt-5.5") {
+            if (
+              body["store"] !== false ||
+              body["model"] !== "gpt-5.5" ||
+              typeof body["user"] !== "string" ||
+              !body["user"].startsWith("chatgpt_") ||
+              request.headers.get("x-real-ip") !== "203.0.113.42"
+            ) {
               return Response.json({ error: "request_not_normalized" }, { status: 400 });
             }
             return new Response('data: {"type":"response.output_text.delta","delta":"hi"}\n\n', {

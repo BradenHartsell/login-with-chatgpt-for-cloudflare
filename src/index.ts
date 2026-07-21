@@ -1,6 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
 import { type CookieSameSite, clearSessionCookie, readCookie, sessionCookie } from "./cookies.ts";
-import { randomSessionId, signSessionId, verifySessionId } from "./crypto.ts";
+import { pseudonymousSessionId, randomSessionId, signSessionId, verifySessionId } from "./crypto.ts";
 import {
   type ReasoningEffort,
   type ServiceTier,
@@ -26,6 +26,7 @@ const REASONING_EFFORTS = new Set<ReasoningEffort>(["none", "low", "medium", "hi
 
 export class ChatGPTSession extends DurableObject<Env> {
   private readonly sessions: SessionService;
+  private readonly endUserId: Promise<string>;
   private requestTail: Promise<void> = Promise.resolve();
 
   constructor(ctx: DurableObjectState, env: Env) {
@@ -37,6 +38,7 @@ export class ChatGPTSession extends DurableObject<Env> {
       sessionTtlMs,
     });
     this.sessions = new SessionService(store, resolveOpenAIConfig());
+    this.endUserId = pseudonymousSessionId(ctx.id.toString(), env.SESSION_SECRET);
   }
 
   override fetch(request: Request): Promise<Response> {
@@ -123,10 +125,12 @@ export class ChatGPTSession extends DurableObject<Env> {
       maxRequestBytes: this.env.MAX_REQUEST_BYTES,
       serviceTier,
       reasoningEffort,
+      endUserId: await this.endUserId,
     });
     if (payload instanceof Response) return payload;
 
-    let upstream = await proxyCodexResponses(resolveOpenAIConfig(), tokens, payload, request.signal);
+    const requestContext = { clientIp: trustedClientIp(request.headers.get("cf-connecting-ip")) };
+    let upstream = await proxyCodexResponses(resolveOpenAIConfig(), tokens, payload, request.signal, requestContext);
     if (!upstream.ok) {
       let detail = await safeText(upstream);
       if (serviceTier === "fast" && detail.toLowerCase().includes("unsupported service_tier")) {
@@ -135,6 +139,7 @@ export class ChatGPTSession extends DurableObject<Env> {
           tokens,
           removeJsonField(payload, "service_tier"),
           request.signal,
+          requestContext,
         );
         if (upstream.ok) {
           return streamResponse(upstream, { "x-login-with-chatgpt-service-tier-fallback": "auto" });
@@ -320,6 +325,7 @@ async function prepareResponsesPayload(
     maxRequestBytes: number;
     serviceTier?: ServiceTier;
     reasoningEffort?: ReasoningEffort;
+    endUserId?: string;
   },
 ): Promise<string | Response> {
   const contentLength = Number(request.headers.get("content-length"));
@@ -341,11 +347,17 @@ async function prepareResponsesPayload(
       normalizeResponsesBody(parsed, {
         serviceTier: options.serviceTier,
         reasoningEffort: options.reasoningEffort,
+        endUserId: options.endUserId,
       }),
     );
   } catch {
     return json({ error: "invalid_responses_request", message: "Expected a JSON object body." }, { status: 400 });
   }
+}
+
+function trustedClientIp(value: string | null): string | undefined {
+  const candidate = value?.trim();
+  return candidate || undefined;
 }
 
 async function readBoundedBody(request: Request, maximumBytes: number): Promise<Uint8Array | Response> {

@@ -1,9 +1,15 @@
 {
   "name": "login-with-chatgpt-for-cloudflare",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Cloudflare Worker fork of opencoredev/login-with-chatgpt with encrypted SQLite Durable Object sessions.",
-  "private": true,
+  "private": false,
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./crypto": "./src/crypto.ts",
+    "./openai": "./src/openai.ts",
+    "./session": "./src/session.ts"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",

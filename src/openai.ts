@@ -68,6 +68,11 @@ export interface ResponsesOptions {
   reasoningSummary?: string;
   textVerbosity?: "low" | "medium" | "high";
   serviceTier?: ServiceTier;
+  endUserId?: string;
+}
+
+export interface CodexRequestContext {
+  clientIp?: string;
 }
 
 export class ChatGPTAuthError extends Error {
@@ -297,13 +302,14 @@ export function proxyCodexResponses(
   tokens: ChatGPTTokens,
   body: string,
   signal?: AbortSignal,
+  context: CodexRequestContext = {},
 ): Promise<Response> {
   return codexRequest(config, tokens, "/responses", {
     method: "POST",
     headers: { "content-type": "application/json", accept: "text/event-stream" },
     body,
     signal,
-  });
+  }, context);
 }
 
 async function codexRequest(
@@ -311,6 +317,7 @@ async function codexRequest(
   tokens: ChatGPTTokens,
   path: string,
   init: RequestInit,
+  context: CodexRequestContext = {},
 ): Promise<Response> {
   if (!tokens.accountId) throw new ChatGPTAuthError("invalid_token", "ChatGPT account id is missing.");
   const url = new URL(`${config.codexBaseUrl}${path}`);
@@ -320,6 +327,7 @@ async function codexRequest(
   headers.set("chatgpt-account-id", tokens.accountId);
   headers.set("openai-beta", "responses=experimental");
   headers.set("originator", config.originator);
+  if (context.clientIp && isIpAddress(context.clientIp)) headers.set("x-real-ip", context.clientIp);
   return fetch(url, { ...init, headers });
 }
 
@@ -344,6 +352,7 @@ export function normalizeResponsesBody(
   if (typeof output["service_tier"] !== "string" && options.serviceTier) {
     output["service_tier"] = options.serviceTier;
   }
+  if (options.endUserId) output["user"] = options.endUserId;
   const include = new Set<string>(
     Array.isArray(output["include"])
       ? output["include"].filter((value): value is string => typeof value === "string")
@@ -355,6 +364,15 @@ export function normalizeResponsesBody(
   delete output["max_output_tokens"];
   delete output["max_completion_tokens"];
   return output;
+}
+
+function isIpAddress(value: string): boolean {
+  const candidate = value.trim();
+  if (!candidate || candidate.length > 45) return false;
+  if (/^(?:\d{1,3}\.){3}\d{1,3}$/.test(candidate)) {
+    return candidate.split(".").every((part) => Number(part) <= 255);
+  }
+  return candidate.includes(":") && /^[0-9a-f:]+$/i.test(candidate);
 }
 
 function filterCodexInput(input: unknown[]): unknown[] {
