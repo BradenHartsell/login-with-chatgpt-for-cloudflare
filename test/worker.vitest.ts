@@ -6,11 +6,11 @@ import { resolveOpenAIConfig } from "../src/openai.ts";
 
 describe("Cloudflare login proxy", () => {
   it("keeps the public OAuth client separate from the calling harness identity", () => {
-    const config = resolveOpenAIConfig({ originator: "vxbe", userAgent: "vxbe/1" });
+    const config = resolveOpenAIConfig({ originator: "example-harness", userAgent: "example-harness/1" });
 
     expect(config.clientId).toBe("app_EMoamEEZ73f0CkXaXp7hrann");
-    expect(config.originator).toBe("vxbe");
-    expect(config.userAgent).toBe("vxbe/1");
+    expect(config.originator).toBe("example-harness");
+    expect(config.userAgent).toBe("example-harness/1");
   });
 
   it("returns an unauthenticated session without allocating a cookie", async () => {

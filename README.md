@@ -93,7 +93,7 @@ The `secrets.required` declaration makes deployment fail closed when `SESSION_SE
 4. After the status becomes `authenticated`, use `/models` and `/responses` with the same cookie.
 5. Call `POST /api/chatgpt/logout` when the user disconnects the account.
 
-Native clients must use a cookie jar or preserve the `lwc_session` cookie explicitly. A VXBE account session and this ChatGPT connection session are separate security boundaries. VXBE should authenticate its own user first, then expose these routes only through the account and profile owner that is allowed to use the connection.
+Native clients must use a cookie jar or preserve the `lwc_session` cookie explicitly. The application's account session and this ChatGPT connection session are separate security boundaries. Authenticate the application user first, then expose these routes only through the application account that owns the connection.
 
 ## Configuration
 
