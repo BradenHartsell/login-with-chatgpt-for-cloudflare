@@ -1,7 +1,8 @@
 import { DurableObject } from "cloudflare:workers";
 import { type CookieSameSite, clearSessionCookie, readCookie, sessionCookie } from "./cookies.ts";
-import { pseudonymousSessionId, randomSessionId, signSessionId, verifySessionId } from "./crypto.ts";
+import { randomSessionId, signSessionId, verifySessionId } from "./crypto.ts";
 import {
+  type OpenAIConfig,
   type ReasoningEffort,
   type ServiceTier,
   ChatGPTAuthError,
@@ -26,7 +27,7 @@ const REASONING_EFFORTS = new Set<ReasoningEffort>(["none", "low", "medium", "hi
 
 export class ChatGPTSession extends DurableObject<Env> {
   private readonly sessions: SessionService;
-  private readonly endUserId: Promise<string>;
+  private readonly openAIConfig: OpenAIConfig;
   private requestTail: Promise<void> = Promise.resolve();
 
   constructor(ctx: DurableObjectState, env: Env) {
@@ -37,8 +38,11 @@ export class ChatGPTSession extends DurableObject<Env> {
       encryptionContext: `chatgpt-session:${ctx.id.toString()}`,
       sessionTtlMs,
     });
-    this.sessions = new SessionService(store, resolveOpenAIConfig());
-    this.endUserId = pseudonymousSessionId(ctx.id.toString(), env.SESSION_SECRET);
+    this.openAIConfig = resolveOpenAIConfig({
+      originator: env.OPENAI_ORIGINATOR,
+      userAgent: env.OPENAI_USER_AGENT,
+    });
+    this.sessions = new SessionService(store, this.openAIConfig);
   }
 
   override fetch(request: Request): Promise<Response> {
@@ -98,7 +102,7 @@ export class ChatGPTSession extends DurableObject<Env> {
   private async handleModels(): Promise<Response> {
     const tokens = await this.sessions.freshTokens();
     if (!tokens?.accessToken || !tokens.accountId) return json({ error: "not_authenticated" }, { status: 401 });
-    const models = await listCodexModels(resolveOpenAIConfig(), tokens);
+    const models = await listCodexModels(this.openAIConfig, tokens);
     return json({ models });
   }
 
@@ -125,21 +129,18 @@ export class ChatGPTSession extends DurableObject<Env> {
       maxRequestBytes: this.env.MAX_REQUEST_BYTES,
       serviceTier,
       reasoningEffort,
-      endUserId: await this.endUserId,
     });
     if (payload instanceof Response) return payload;
 
-    const requestContext = { clientIp: trustedClientIp(request.headers.get("cf-connecting-ip")) };
-    let upstream = await proxyCodexResponses(resolveOpenAIConfig(), tokens, payload, request.signal, requestContext);
+    let upstream = await proxyCodexResponses(this.openAIConfig, tokens, payload, request.signal);
     if (!upstream.ok) {
       let detail = await safeText(upstream);
       if (serviceTier === "fast" && detail.toLowerCase().includes("unsupported service_tier")) {
         upstream = await proxyCodexResponses(
-          resolveOpenAIConfig(),
+          this.openAIConfig,
           tokens,
           removeJsonField(payload, "service_tier"),
           request.signal,
-          requestContext,
         );
         if (upstream.ok) {
           return streamResponse(upstream, { "x-login-with-chatgpt-service-tier-fallback": "auto" });
@@ -325,7 +326,6 @@ async function prepareResponsesPayload(
     maxRequestBytes: number;
     serviceTier?: ServiceTier;
     reasoningEffort?: ReasoningEffort;
-    endUserId?: string;
   },
 ): Promise<string | Response> {
   const contentLength = Number(request.headers.get("content-length"));
@@ -347,17 +347,11 @@ async function prepareResponsesPayload(
       normalizeResponsesBody(parsed, {
         serviceTier: options.serviceTier,
         reasoningEffort: options.reasoningEffort,
-        endUserId: options.endUserId,
       }),
     );
   } catch {
     return json({ error: "invalid_responses_request", message: "Expected a JSON object body." }, { status: 400 });
   }
-}
-
-function trustedClientIp(value: string | null): string | undefined {
-  const candidate = value?.trim();
-  return candidate || undefined;
 }
 
 async function readBoundedBody(request: Request, maximumBytes: number): Promise<Uint8Array | Response> {

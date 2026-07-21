@@ -30,6 +30,8 @@
     "COOKIE_NAME": "lwc_session",
     "COOKIE_SAME_SITE": "Lax",
     "DEFAULT_MODEL": "gpt-5.5",
+    "OPENAI_ORIGINATOR": "login-with-chatgpt-for-cloudflare",
+    "OPENAI_USER_AGENT": "login-with-chatgpt-for-cloudflare/0.3.0",
     "MAX_REQUEST_BYTES": 16777216,
     "RESPONSES_RATE_LIMIT": 30,
     "RESPONSES_RATE_WINDOW_SECONDS": 60,

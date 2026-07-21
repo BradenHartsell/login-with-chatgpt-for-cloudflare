@@ -6,10 +6,10 @@ const REASONING_ENCRYPTED_CONTENT = "reasoning.encrypted_content";
 export const DEFAULT_MODEL = "gpt-5.5";
 
 const DEFAULT_CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann";
-const DEFAULT_CLIENT_VERSION = "0.142.5";
 const DEFAULT_CODEX_BASE_URL = "https://chatgpt.com/backend-api/codex";
 const DEFAULT_ISSUER = "https://auth.openai.com";
-const DEFAULT_ORIGINATOR = "codex_cli_rs";
+const DEFAULT_ORIGINATOR = "login-with-chatgpt-for-cloudflare";
+const DEFAULT_USER_AGENT = "login-with-chatgpt-for-cloudflare/0.3.0";
 const DEFAULT_SCOPE = "openid profile email offline_access";
 const DEFAULT_INSTRUCTIONS =
   "You are a helpful assistant powered by the user's ChatGPT account. Answer the user's request directly and helpfully.";
@@ -52,9 +52,9 @@ export type DevicePollResult =
 
 export interface OpenAIConfig {
   clientId: string;
-  clientVersion: string;
   codexBaseUrl: string;
   originator: string;
+  userAgent: string;
   scope: string;
   tokenUrl: string;
   deviceApiBase: string;
@@ -68,11 +68,6 @@ export interface ResponsesOptions {
   reasoningSummary?: string;
   textVerbosity?: "low" | "medium" | "high";
   serviceTier?: ServiceTier;
-  endUserId?: string;
-}
-
-export interface CodexRequestContext {
-  clientIp?: string;
 }
 
 export class ChatGPTAuthError extends Error {
@@ -89,12 +84,14 @@ export class ChatGPTAuthError extends Error {
   }
 }
 
-export function resolveOpenAIConfig(): OpenAIConfig {
+export function resolveOpenAIConfig(
+  identity: { originator?: string; userAgent?: string } = {},
+): OpenAIConfig {
   return {
     clientId: DEFAULT_CLIENT_ID,
-    clientVersion: DEFAULT_CLIENT_VERSION,
     codexBaseUrl: DEFAULT_CODEX_BASE_URL,
-    originator: DEFAULT_ORIGINATOR,
+    originator: identity.originator?.trim() || DEFAULT_ORIGINATOR,
+    userAgent: identity.userAgent?.trim() || DEFAULT_USER_AGENT,
     scope: DEFAULT_SCOPE,
     tokenUrl: `${DEFAULT_ISSUER}/oauth/token`,
     deviceApiBase: `${DEFAULT_ISSUER}/api/accounts`,
@@ -111,7 +108,7 @@ export async function requestDeviceCode(
   try {
     response = await fetch(`${config.deviceApiBase}/deviceauth/usercode`, {
       method: "POST",
-      headers: { "content-type": "application/json", accept: "application/json" },
+      headers: openAIHeaders(config, { "content-type": "application/json", accept: "application/json" }),
       body: JSON.stringify({ client_id: config.clientId }),
     });
   } catch (cause) {
@@ -157,7 +154,7 @@ export async function pollDeviceCode(
   try {
     response = await fetch(`${config.deviceApiBase}/deviceauth/token`, {
       method: "POST",
-      headers: { "content-type": "application/json", accept: "application/json" },
+      headers: openAIHeaders(config, { "content-type": "application/json", accept: "application/json" }),
       body: JSON.stringify({ device_auth_id: device.deviceAuthId, user_code: device.userCode }),
     });
   } catch (cause) {
@@ -216,7 +213,10 @@ async function exchangeAuthorizationCode(
   try {
     response = await fetch(config.tokenUrl, {
       method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded", accept: "application/json" },
+      headers: openAIHeaders(config, {
+        "content-type": "application/x-www-form-urlencoded",
+        accept: "application/json",
+      }),
       body,
     });
   } catch (cause) {
@@ -243,7 +243,7 @@ async function refreshTokens(config: OpenAIConfig, refreshToken: string): Promis
   try {
     response = await fetch(config.tokenUrl, {
       method: "POST",
-      headers: { "content-type": "application/json", accept: "application/json" },
+      headers: openAIHeaders(config, { "content-type": "application/json", accept: "application/json" }),
       body: JSON.stringify({
         grant_type: "refresh_token",
         refresh_token: refreshToken,
@@ -302,14 +302,13 @@ export function proxyCodexResponses(
   tokens: ChatGPTTokens,
   body: string,
   signal?: AbortSignal,
-  context: CodexRequestContext = {},
 ): Promise<Response> {
   return codexRequest(config, tokens, "/responses", {
     method: "POST",
     headers: { "content-type": "application/json", accept: "text/event-stream" },
     body,
     signal,
-  }, context);
+  });
 }
 
 async function codexRequest(
@@ -317,17 +316,15 @@ async function codexRequest(
   tokens: ChatGPTTokens,
   path: string,
   init: RequestInit,
-  context: CodexRequestContext = {},
 ): Promise<Response> {
   if (!tokens.accountId) throw new ChatGPTAuthError("invalid_token", "ChatGPT account id is missing.");
   const url = new URL(`${config.codexBaseUrl}${path}`);
-  url.searchParams.set("client_version", config.clientVersion);
   const headers = new Headers(init.headers);
   headers.set("authorization", `Bearer ${tokens.accessToken}`);
   headers.set("chatgpt-account-id", tokens.accountId);
   headers.set("openai-beta", "responses=experimental");
   headers.set("originator", config.originator);
-  if (context.clientIp && isIpAddress(context.clientIp)) headers.set("x-real-ip", context.clientIp);
+  headers.set("user-agent", config.userAgent);
   return fetch(url, { ...init, headers });
 }
 
@@ -352,7 +349,8 @@ export function normalizeResponsesBody(
   if (typeof output["service_tier"] !== "string" && options.serviceTier) {
     output["service_tier"] = options.serviceTier;
   }
-  if (options.endUserId) output["user"] = options.endUserId;
+  delete output["user"];
+  delete output["safety_identifier"];
   const include = new Set<string>(
     Array.isArray(output["include"])
       ? output["include"].filter((value): value is string => typeof value === "string")
@@ -364,15 +362,6 @@ export function normalizeResponsesBody(
   delete output["max_output_tokens"];
   delete output["max_completion_tokens"];
   return output;
-}
-
-function isIpAddress(value: string): boolean {
-  const candidate = value.trim();
-  if (!candidate || candidate.length > 45) return false;
-  if (/^(?:\d{1,3}\.){3}\d{1,3}$/.test(candidate)) {
-    return candidate.split(".").every((part) => Number(part) <= 255);
-  }
-  return candidate.includes(":") && /^[0-9a-f:]+$/i.test(candidate);
 }
 
 function filterCodexInput(input: unknown[]): unknown[] {
@@ -483,6 +472,12 @@ function decodeJwt(token: string | undefined): Record<string, unknown> | undefin
 function normalizeInterval(value: string | number | undefined): number {
   const parsed = typeof value === "string" ? Number.parseInt(value.trim(), 10) : value;
   return typeof parsed === "number" && Number.isFinite(parsed) && parsed > 0 ? parsed : 5;
+}
+
+function openAIHeaders(config: OpenAIConfig, values: HeadersInit): Headers {
+  const headers = new Headers(values);
+  headers.set("user-agent", config.userAgent);
+  return headers;
 }
 
 function extractErrorCode(body: string): string | undefined {

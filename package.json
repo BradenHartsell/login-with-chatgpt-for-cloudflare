@@ -1,6 +1,6 @@
 {
   "name": "login-with-chatgpt-for-cloudflare",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Cloudflare Worker fork of opencoredev/login-with-chatgpt with encrypted SQLite Durable Object sessions.",
   "private": false,
   "type": "module",

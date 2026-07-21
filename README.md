@@ -103,6 +103,8 @@ Non-secret settings live in `wrangler.jsonc`:
 - `COOKIE_NAME`: signed session cookie name
 - `COOKIE_SAME_SITE`: `Lax` by default, or `None` for an HTTPS cross-origin browser client
 - `DEFAULT_MODEL`: model used when a Responses body omits `model`
+- `OPENAI_ORIGINATOR`: honest harness identity sent to the Codex service
+- `OPENAI_USER_AGENT`: matching user-agent identity and adapter version
 - `ALLOWED_ORIGINS`: comma-separated browser origins allowed for non-GET requests
 - `SESSION_TTL_SECONDS`: authenticated session lifetime
 - `MAX_REQUEST_BYTES`: bounded JSON body size for the Responses proxy
@@ -121,8 +123,9 @@ The default body limit is 16 MiB because Workers have a fixed isolate memory cei
 - Rate counters and session state are strongly consistent inside the same SQLite Durable Object.
 - Browser writes are same-origin by default and fail with `403` for untrusted origins.
 - Responses are streamed from the Durable Object through the outer Worker without buffering the upstream event stream.
-- Every Responses request receives a server-owned pseudonymous `user` value. Clients cannot replace it with another identity. OpenAI documents this field as an abuse-monitoring signal.
-- When Cloudflare supplies `CF-Connecting-IP`, the Worker forwards that address as `X-Real-IP` without storing or logging it. This is best-effort network context, not a promise that an upstream service will consume it.
+- The public Codex OAuth client id is used only for the OAuth client identity. The adapter identifies its actual harness separately through `originator` and `User-Agent`; do not claim `codex_cli_rs` unless the caller really is the Codex CLI.
+- Client-supplied `user` and `safety_identifier` fields are removed. The connected ChatGPT account remains the upstream subscription and allowance boundary, while deployers must keep their own application account and profile boundary server-side.
+- Client IP addresses are neither stored nor forwarded. There is no documented Codex subscription contract for an application to spoof an end-user network address, and Cloudflare egress rotation is not an identity or quota boundary.
 
 The package also exports `./openai`, `./session`, and `./crypto` for server-side Cloudflare integrations that need the provider transport without the cookie-facing HTTP adapter. Keep those imports on trusted Workers only. Never bundle them into a client application.
 

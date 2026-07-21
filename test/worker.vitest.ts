@@ -2,8 +2,17 @@ import { env } from "cloudflare:workers";
 import { SELF, runInDurableObject } from "cloudflare:test";
 import { describe, expect, it } from "vitest";
 import { verifySessionId } from "../src/crypto.ts";
+import { resolveOpenAIConfig } from "../src/openai.ts";
 
 describe("Cloudflare login proxy", () => {
+  it("keeps the public OAuth client separate from the calling harness identity", () => {
+    const config = resolveOpenAIConfig({ originator: "vxbe", userAgent: "vxbe/1" });
+
+    expect(config.clientId).toBe("app_EMoamEEZ73f0CkXaXp7hrann");
+    expect(config.originator).toBe("vxbe");
+    expect(config.userAgent).toBe("vxbe/1");
+  });
+
   it("returns an unauthenticated session without allocating a cookie", async () => {
     const response = await SELF.fetch("https://login.example.test/api/chatgpt/session");
 
@@ -135,7 +144,11 @@ describe("Cloudflare login proxy", () => {
         "content-type": "application/json",
         "cf-connecting-ip": "203.0.113.42",
       },
-      body: JSON.stringify({ input: "hello", user: "client-spoofed-user" }),
+      body: JSON.stringify({
+        input: "hello",
+        user: "client-spoofed-user",
+        safety_identifier: "client-spoofed-safety-identifier",
+      }),
     });
     expect(responses.status).toBe(200);
     expect(responses.headers.get("content-type")).toBe("text/event-stream");

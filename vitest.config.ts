@@ -68,9 +68,11 @@ export default defineProject({
             if (
               body["store"] !== false ||
               body["model"] !== "gpt-5.5" ||
-              typeof body["user"] !== "string" ||
-              !body["user"].startsWith("chatgpt_") ||
-              request.headers.get("x-real-ip") !== "203.0.113.42"
+              "user" in body ||
+              "safety_identifier" in body ||
+              request.headers.has("x-real-ip") ||
+              request.headers.get("originator") !== "login-with-chatgpt-for-cloudflare" ||
+              request.headers.get("user-agent") !== "login-with-chatgpt-for-cloudflare/0.3.0"
             ) {
               return Response.json({ error: "request_not_normalized" }, { status: 400 });
             }
